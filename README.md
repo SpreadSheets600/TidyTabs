@@ -23,13 +23,6 @@ TidyTabs is a Chrome extension that leverages Google's Gemini AI to automaticall
 
 **Problem Solved**: Power users and researchers often accumulate dozens or hundreds of tabs across multiple projects, making navigation and context-switching difficult. Manual tab organization is time-consuming and error-prone.
 
-**Intended Audience**:
-
-- Developers managing multiple codebases and documentation
-- Researchers tracking numerous sources and references
-- Content creators organizing research and inspiration
-- Anyone with 10+ open tabs who wants better organization
-
 **Key Features**:
 
 - AI-powered semantic grouping using Gemini API
@@ -224,3 +217,4 @@ A: Error notifications will appear explaining the issue (e.g., invalid API key, 
 - Google Gemini API for AI-powered semantic analysis
 - Chrome Extensions team for Manifest V3 documentation
 - shadcn/ui for design inspiration
+
