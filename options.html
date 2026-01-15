@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>TidyTabs Settings</title>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body data-page="options">
+		<div class="container">
+			<div class="wrapper">
+				<header class="header">
+					<span class="header-icon">⚡</span>
+					<h1 class="header-title">TidyTabs Settings</h1>
+				</header>
+
+				<main class="main">
+					<section class="card">
+						<header class="card-header">
+							<h2 class="card-title">
+								<span>🔑</span>
+								API Key
+							</h2>
+						</header>
+						<section class="card-body">
+							<p class="text-sm">
+								Enter your Gemini API key from
+								<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Your key is stored locally and never sent anywhere except to Gemini.
+							</p>
+							<div class="input-group">
+								<input type="password" id="apiKeyInput" class="input" placeholder="Enter your Gemini API key" autocomplete="off" />
+								<button id="toggleApiKeyBtn" class="btn btn-icon" title="Toggle visibility">👁</button>
+							</div>
+							<div id="apiKeyStatus" class="alert alert-info hidden" role="status"></div>
+						</section>
+						<footer class="card-footer">
+							<button id="saveApiKeyBtn" class="btn btn-primary">Save Key</button>
+							<button id="testApiKeyBtn" class="btn btn-secondary">Test Key</button>
+						</footer>
+					</section>
+
+					<section class="card">
+						<header class="card-header">
+							<h2 class="card-title">
+								<span>⚙️</span>
+								Default Settings
+							</h2>
+						</header>
+						<section class="card-body">
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Default Scope</p>
+									<p class="setting-description">Which tabs to organize by default</p>
+								</div>
+								<select id="defaultScope" class="select">
+									<option value="current">Current Window</option>
+									<option value="all">All Windows</option>
+								</select>
+							</div>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Default Mode</p>
+									<p class="setting-description">Preview changes or apply instantly</p>
+								</div>
+								<select id="defaultMode" class="select">
+									<option value="preview">Preview First</option>
+									<option value="instant">Instant Apply</option>
+								</select>
+							</div>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Respect Pinned Tabs</p>
+									<p class="setting-description">Don't group pinned tabs</p>
+								</div>
+								<div class="toggle-wrapper">
+									<input type="checkbox" id="respectPinned" class="toggle" checked />
+									<label for="respectPinned"></label>
+								</div>
+							</div>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Respect Existing Groups</p>
+									<p class="setting-description">Don't re-group already grouped tabs</p>
+								</div>
+								<div class="toggle-wrapper">
+									<input type="checkbox" id="respectExistingGroups" class="toggle" />
+									<label for="respectExistingGroups"></label>
+								</div>
+							</div>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Auto-Organize</p>
+									<p class="setting-description">Automatically organize tabs on a schedule</p>
+								</div>
+								<div class="toggle-wrapper">
+									<input type="checkbox" id="autoOrganize" class="toggle" />
+									<label for="autoOrganize"></label>
+								</div>
+							</div>
+
+							<div class="setting-row" id="autoOrganizeIntervalRow">
+								<div class="setting-info">
+									<p class="setting-label">Auto-Organize Interval</p>
+									<p class="setting-description">How often to organize (min 2 minutes)</p>
+								</div>
+								<select id="autoOrganizeInterval" class="select">
+									<option value="2">2 minutes</option>
+									<option value="5">5 minutes</option>
+									<option value="10">10 minutes</option>
+									<option value="15">15 minutes</option>
+									<option value="30">30 minutes</option>
+									<option value="60">1 hour</option>
+								</select>
+							</div>
+						</section>
+					</section>
+
+					<section class="card">
+						<header class="card-header">
+							<h2 class="card-title">
+								<span>🖱️</span>
+								Context Menu Settings
+							</h2>
+						</header>
+						<section class="card-body">
+							<p class="text-sm">Configure how the right-click "Organize Tabs" option works. Context menu always applies changes instantly (no preview).</p>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Context Menu Scope</p>
+									<p class="setting-description">Which tabs to organize from context menu</p>
+								</div>
+								<select id="contextMenuScope" class="select">
+									<option value="current">Current Window</option>
+									<option value="all">All Windows</option>
+								</select>
+							</div>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Respect Pinned Tabs</p>
+									<p class="setting-description">Don't group pinned tabs (uses default setting)</p>
+								</div>
+								<span class="text-sm">Follows global setting above</span>
+							</div>
+
+							<div class="setting-row">
+								<div class="setting-info">
+									<p class="setting-label">Respect Existing Groups</p>
+									<p class="setting-description">Don't re-group tabs (uses default setting)</p>
+								</div>
+								<span class="text-sm">Follows global setting above</span>
+							</div>
+						</section>
+					</section>
+
+					<section class="card">
+						<header class="card-header">
+							<h2 class="card-title">
+								<span>📝</span>
+								Prompt Template
+							</h2>
+						</header>
+						<section class="card-body">
+							<p class="text-sm">
+								Customize the prompt sent to Gemini. Use variables like
+								<code>{{TAB_DATA}}</code>, <code>{{TAB_COUNT}}</code>, <code>{{DOMAINS}}</code>.
+							</p>
+							<textarea id="promptTemplate" class="textarea" rows="12" spellcheck="false"></textarea>
+						</section>
+						<footer class="card-footer">
+							<button id="savePromptBtn" class="btn btn-primary">Save Prompt</button>
+							<button id="resetPromptBtn" class="btn btn-secondary">Reset to Default</button>
+						</footer>
+						<div class="card-body">
+							<h3 class="text-medium">Presets</h3>
+							<div class="input-group">
+								<input type="text" id="presetNameInput" class="input" placeholder="Preset name" />
+								<button id="savePresetBtn" class="btn btn-secondary">Save Preset</button>
+							</div>
+							<div id="presetsList" class="presets-list">
+								<!-- Presets will be rendered here -->
+							</div>
+						</div>
+					</section>
+
+					<section class="card">
+						<header class="card-header">
+							<h2 class="card-title">
+								<span>📜</span>
+								History
+							</h2>
+						</header>
+						<section class="card-body">
+							<div id="historyList" class="history-list">
+								<!-- History will be rendered here -->
+							</div>
+							<button id="clearHistoryBtn" class="btn btn-error">Clear History</button>
+						</section>
+					</section>
+
+					<section class="card">
+						<header class="card-header">
+							<h2 class="card-title">
+								<span>📚</span>
+								Variable Reference
+							</h2>
+						</header>
+						<section class="card-body">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>Variable</th>
+										<th>Description</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td><code>{{TAB_DATA}}</code></td>
+										<td>JSON array of tab objects with id, title, url, domain</td>
+									</tr>
+									<tr>
+										<td><code>{{TAB_COUNT}}</code></td>
+										<td>Total number of tabs being organized</td>
+									</tr>
+									<tr>
+										<td><code>{{DOMAINS}}</code></td>
+										<td>Array of unique domain names</td>
+									</tr>
+									<tr>
+										<td><code>{{WINDOW_ID}}</code></td>
+										<td>Current window ID (when using current window scope)</td>
+									</tr>
+								</tbody>
+							</table>
+						</section>
+					</section>
+				</main>
+
+				<footer class="footer">
+					<p>TidyTabs v1.0.0 • Made with ⚡</p>
+				</footer>
+			</div>
+		</div>
+
+		<script src="options.js" type="module"></script>
+	</body>
+</html>
