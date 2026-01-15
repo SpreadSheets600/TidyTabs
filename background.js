@@ -52,7 +52,7 @@ async function handleOrganizeTabs(options = {}) {
 		};
 
 		const prompt = buildPrompt(settings.promptTemplate, variables);
-		const response = await callGemini(settings.apiKey, prompt);
+		const response = await callGemini(settings.apiKey, prompt, settings.selectedModel);
 
 		if (isPreview) {
 			const enhancedGroups = response.groups.map((group) => ({
