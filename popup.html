@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=320" />
+		<title>TidyTabs</title>
+		<link rel="stylesheet" href="styles.css" />
+	</head>
+	<body data-page="popup">
+		<div class="container">
+			<div class="wrapper">
+				<header class="header">
+					<div class="header-logo">
+						<span class="header-icon">⚡</span>
+						<span class="header-title">TidyTabs</span>
+					</div>
+					<button id="settingsBtn" class="btn-icon" title="Settings (S)">
+						<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#ffffff" viewBox="0 0 256 256">
+							<path
+								d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,80a32,32,0,1,1,32-32A32,32,0,0,1,128,160Zm88-29.84q.06-2.16,0-4.32l14.92-18.64a8,8,0,0,0,1.48-7.06,107.21,107.21,0,0,0-10.88-26.25,8,8,0,0,0-6-3.93l-23.72-2.64q-1.48-1.56-3-3L186,40.54a8,8,0,0,0-3.94-6,107.71,107.71,0,0,0-26.25-10.87,8,8,0,0,0-7.06,1.49L130.16,40Q128,40,125.84,40L107.2,25.11a8,8,0,0,0-7.06-1.48A107.6,107.6,0,0,0,73.89,34.51a8,8,0,0,0-3.93,6L67.32,64.27q-1.56,1.49-3,3L40.54,70a8,8,0,0,0-6,3.94,107.71,107.71,0,0,0-10.87,26.25,8,8,0,0,0,1.49,7.06L40,125.84Q40,128,40,130.16L25.11,148.8a8,8,0,0,0-1.48,7.06,107.21,107.21,0,0,0,10.88,26.25,8,8,0,0,0,6,3.93l23.72,2.64q1.49,1.56,3,3L70,215.46a8,8,0,0,0,3.94,6,107.71,107.71,0,0,0,26.25,10.87,8,8,0,0,0,7.06-1.49L125.84,216q2.16.06,4.32,0l18.64,14.92a8,8,0,0,0,7.06,1.48,107.21,107.21,0,0,0,26.25-10.88,8,8,0,0,0,3.93-6l2.64-23.72q1.56-1.48,3-3L215.46,186a8,8,0,0,0,6-3.94,107.71,107.71,0,0,0,10.87-26.25,8,8,0,0,0-1.49-7.06Zm-16.1-6.5a73.93,73.93,0,0,1,0,8.68,8,8,0,0,0,1.74,5.48l14.19,17.73a91.57,91.57,0,0,1-6.23,15L187,173.11a8,8,0,0,0-5.1,2.64,74.11,74.11,0,0,1-6.14,6.14,8,8,0,0,0-2.64,5.1l-2.51,22.58a91.32,91.32,0,0,1-15,6.23l-17.74-14.19a8,8,0,0,0-5-1.75h-.48a73.93,73.93,0,0,1-8.68,0,8,8,0,0,0-5.48,1.74L100.45,215.8a91.57,91.57,0,0,1-15-6.23L82.89,187a8,8,0,0,0-2.64-5.1,74.11,74.11,0,0,1-6.14-6.14,8,8,0,0,0-5.1-2.64L46.43,170.6a91.32,91.32,0,0,1-6.23-15l14.19-17.74a8,8,0,0,0,1.74-5.48,73.93,73.93,0,0,1,0-8.68,8,8,0,0,0-1.74-5.48L40.2,100.45a91.57,91.57,0,0,1,6.23-15L69,82.89a8,8,0,0,0,5.1-2.64,74.11,74.11,0,0,1,6.14-6.14A8,8,0,0,0,82.89,69L85.4,46.43a91.32,91.32,0,0,1,15-6.23l17.74,14.19a8,8,0,0,0,5.48,1.74,73.93,73.93,0,0,1,8.68,0,8,8,0,0,0,5.48-1.74L155.55,40.2a91.57,91.57,0,0,1,15,6.23L173.11,69a8,8,0,0,0,2.64,5.1,74.11,74.11,0,0,1,6.14,6.14,8,8,0,0,0,5.1,2.64l22.58,2.51a91.32,91.32,0,0,1,6.23,15l-14.19,17.74A8,8,0,0,0,199.87,123.66Z"
+							></path>
+						</svg>
+					</button>
+				</header>
+
+				<div class="card">
+					<div class="card-body">
+						<div class="stats">
+							<span id="tabCount"><span class="tab-count">-</span> tabs</span>
+							<span id="scopeDisplay">current window</span>
+						</div>
+					</div>
+				</div>
+
+				<div id="apiKeyWarning" class="alert alert-warning hidden">
+					<span>⚠️ API key required</span>
+					<button id="addApiKeyBtn" class="btn-link">Add key</button>
+				</div>
+
+				<div class="controls">
+					<div class="control-group">
+						<p class="control-label">Scope</p>
+						<div class="button-group">
+							<button id="scopeCurrent" class="btn" data-scope="current">Current</button>
+							<button id="scopeAll" class="btn" data-scope="all">All Windows</button>
+						</div>
+					</div>
+
+					<div class="control-group">
+						<p class="control-label">Mode</p>
+						<div class="button-group">
+							<button id="modePreview" class="btn" data-mode="preview">Preview</button>
+							<button id="modeInstant" class="btn" data-mode="instant">Instant</button>
+						</div>
+					</div>
+
+					<div class="auto-toggle">
+						<div class="auto-info">
+							<p>Auto-Organize</p>
+							<span id="autoStatus" class="auto-status">Off</span>
+						</div>
+						<div class="toggle-wrapper">
+							<input type="checkbox" id="autoOrganizeToggle" class="toggle" />
+							<label for="autoOrganizeToggle"></label>
+						</div>
+					</div>
+				</div>
+
+				<div class="controls">
+					<button id="organizeBtn" class="btn btn-primary btn-full">🔄 Organize Tabs</button>
+					<button id="clearBtn" class="btn btn-secondary btn-full">✖ Clear Groups</button>
+				</div>
+
+				<div id="previewSection" class="preview-section hidden">
+					<div class="preview-header">
+						<h3 class="preview-title">Preview</h3>
+						<button id="closePreviewBtn" class="btn-icon">✕</button>
+					</div>
+					<div id="previewContent" class="preview-content">
+						<!-- Groups will be rendered here -->
+					</div>
+					<div class="preview-actions">
+						<button id="applyBtn" class="btn btn-primary btn-full">✓ Apply Groups</button>
+						<button id="editBtn" class="btn btn-full">✎ Edit Prompt</button>
+					</div>
+				</div>
+
+				<div id="loadingOverlay" class="loading-overlay hidden">
+					<div class="loading-content">
+						<div class="spinner"></div>
+						<span class="loading-text">Analyzing tabs...</span>
+					</div>
+				</div>
+
+				<div id="errorMessage" class="message message-error hidden">
+					<span id="errorText"></span>
+					<button id="dismissErrorBtn" class="btn-icon">✕</button>
+				</div>
+
+				<div id="successMessage" class="message message-success hidden" role="status">
+					<span id="successText"></span>
+				</div>
+
+				<footer class="footer">
+					<kbd>Ctrl+Shift+G</kbd>
+				</footer>
+			</div>
+		</div>
+
+		<script src="popup.js" type="module"></script>
+	</body>
+</html>
