@@ -32,6 +32,19 @@
 								<button id="toggleApiKeyBtn" class="btn btn-icon" title="Toggle visibility">👁</button>
 							</div>
 							<div id="apiKeyStatus" class="alert alert-info hidden" role="status"></div>
+
+							<div class="setting-row" style="margin-top: 1rem">
+								<div class="setting-info">
+									<p class="setting-label">Model</p>
+									<p class="setting-description">Select Gemini model</p>
+								</div>
+								<div class="flex gap-2" style="display: flex; gap: 0.5rem; width: 100%; max-width: 300px">
+									<select id="modelSelect" class="select" style="flex: 1">
+										<option value="" disabled selected>Loading models...</option>
+									</select>
+									<button id="refreshModelsBtn" class="btn btn-icon" title="Refresh Models">🔄</button>
+								</div>
+							</div>
 						</section>
 						<footer class="card-footer">
 							<button id="saveApiKeyBtn" class="btn btn-primary">Save Key</button>

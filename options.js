@@ -1,5 +1,5 @@
 import { getSettings, saveSettings, saveApiKey, getPresets, savePreset, deletePreset, getHistory, clearHistory } from "./lib/storage.js";
-import { testApiKey } from "./lib/gemini.js";
+import { testApiKey, fetchModels, getDefaultModel } from "./lib/gemini.js";
 
 const DEFAULT_PROMPT = `Group These Tabs By Topic/Domain. Create 2-7 Groups Max.
 
@@ -16,6 +16,10 @@ const elements = {
 	testApiKeyBtn: document.getElementById("testApiKeyBtn"),
 
 	apiKeyStatus: document.getElementById("apiKeyStatus"),
+
+	modelSelect: document.getElementById("modelSelect"),
+	refreshModelsBtn: document.getElementById("refreshModelsBtn"),
+
 	defaultScope: document.getElementById("defaultScope"),
 
 	defaultMode: document.getElementById("defaultMode"),
@@ -47,6 +51,9 @@ async function init() {
 
 	if (settings.apiKey) {
 		elements.apiKeyInput.value = settings.apiKey;
+		await updateModelList(settings.apiKey, settings.selectedModel);
+	} else {
+		updateModelSelectState(false);
 	}
 
 	elements.defaultScope.value = settings.scope || "current";
@@ -65,6 +72,66 @@ async function init() {
 	await renderPresets();
 	await renderHistory();
 	attachEventListeners();
+}
+
+async function updateModelList(apiKey, selectedModel) {
+	if (!apiKey) {
+		updateModelSelectState(false);
+		return;
+	}
+
+	elements.modelSelect.innerHTML = "<option disabled selected>Loading models...</option>";
+	elements.modelSelect.disabled = true;
+	elements.refreshModelsBtn.disabled = true;
+
+	const models = await fetchModels(apiKey);
+	const defaultModel = getDefaultModel();
+
+	elements.modelSelect.innerHTML = "";
+	models.forEach((model) => {
+		const option = document.createElement("option");
+		option.value = model;
+		option.textContent = model;
+		elements.modelSelect.appendChild(option);
+	});
+
+	if (selectedModel && models.includes(selectedModel)) {
+		elements.modelSelect.value = selectedModel;
+	} else if (models.includes(defaultModel)) {
+		elements.modelSelect.value = defaultModel;
+	} else if (models.length > 0) {
+		elements.modelSelect.value = models[0];
+	}
+
+	if (elements.modelSelect.value && elements.modelSelect.value !== selectedModel) {
+		await saveSettings({ selectedModel: elements.modelSelect.value });
+	}
+
+	updateModelSelectState(true);
+}
+
+function updateModelSelectState(enabled) {
+	elements.modelSelect.disabled = !enabled;
+	elements.refreshModelsBtn.disabled = !enabled;
+	if (!enabled) {
+		elements.modelSelect.innerHTML = "<option disabled selected>Enter API key first</option>";
+	}
+}
+
+async function handleRefreshModels() {
+	const key = elements.apiKeyInput.value.trim();
+	if (!key) {
+		showApiKeyStatus("Please enter an API key", "error");
+		return;
+	}
+	await updateModelList(key, elements.modelSelect.value);
+}
+
+async function handleModelChange() {
+	const model = elements.modelSelect.value;
+	if (model) {
+		await saveSettings({ selectedModel: model });
+	}
 }
 
 function updateAutoOrganizeIntervalVisibility() {
@@ -101,19 +168,24 @@ async function handleSaveApiKey() {
 
 	await saveApiKey(key);
 	showApiKeyStatus("API key saved successfully", "success");
+
+	// Preserve currently selected model if possible
+	const currentModel = elements.modelSelect.value;
+	await updateModelList(key, currentModel);
 }
 
 async function handleTestApiKey() {
 	const key = elements.apiKeyInput.value.trim();
+	const model = elements.modelSelect.value;
 
 	if (!key) {
 		showApiKeyStatus("Please enter an API key first", "error");
 		return;
 	}
 
-	showApiKeyStatus("Testing API key...", "info");
+	showApiKeyStatus(`Testing API key with ${model}...`, "info");
 
-	const isValid = await testApiKey(key);
+	const isValid = await testApiKey(key, model);
 
 	if (isValid) {
 		showApiKeyStatus("✓ API key is valid!", "success");
@@ -328,6 +400,9 @@ function attachEventListeners() {
 	elements.saveApiKeyBtn.addEventListener("click", handleSaveApiKey);
 	elements.testApiKeyBtn.addEventListener("click", handleTestApiKey);
 	elements.toggleApiKeyBtn.addEventListener("click", toggleApiKeyVisibility);
+
+	elements.refreshModelsBtn.addEventListener("click", handleRefreshModels);
+	elements.modelSelect.addEventListener("change", handleModelChange);
 
 	elements.defaultScope.addEventListener("change", handleSettingsChange);
 	elements.defaultMode.addEventListener("change", handleSettingsChange);
