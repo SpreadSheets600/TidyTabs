@@ -18,9 +18,7 @@ AI-powered browser tab organization using Google's Gemini API to intelligently g
 
 ## Usage
 
-<p align="center">
-  <video src=".github/preview.mp4" width="500px" controls></video>
-</p>
+![preview](.github/preview.gif)
 
 <h3>
 <details>
