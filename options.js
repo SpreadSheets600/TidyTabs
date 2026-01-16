@@ -1,12 +1,12 @@
 import { getSettings, saveSettings, saveApiKey, getPresets, savePreset, deletePreset, getHistory, clearHistory } from "./lib/storage.js";
 import { testApiKey, fetchModels, getDefaultModel } from "./lib/gemini.js";
 
-const DEFAULT_PROMPT = `Group These Tabs By Topic/Domain. Create 2-7 Groups Max.
+const DEFAULT_PROMPT = `Group these tabs by topic/domain/category. Create 2-7 groups max. Create group which a user may seem helpful when there are a lot of tabs.
 
 {{TAB_DATA}}
 
-Output Valid JSON Only:
-{"groups":[{"label":"Short Name (1 - 2 Words Max.)","tabIds":[1,2,3]}]}`;
+Output valid JSON only:
+{"groups":[{"label":"Short Name","tabIds":[1,2,3]}]}`;
 
 const elements = {
 	apiKeyInput: document.getElementById("apiKeyInput"),
