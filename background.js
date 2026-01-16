@@ -303,7 +303,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 		const notificationId = await chrome.notifications.create({
 			type: "basic",
-			iconUrl: "icons/icon128.png",
+			iconUrl: chrome.runtime.getURL("icons/icon128.png"),
 			title: "TidyTabs",
 			message: "Analyzing tabs...",
 			priority: 1,
@@ -319,7 +319,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 		if (result.success) {
 			chrome.notifications.create({
 				type: "basic",
-				iconUrl: "icons/icon128.png",
+				iconUrl: chrome.runtime.getURL("icons/icon128.png"),
 				title: "TidyTabs - Success",
 				message: `Organized ${result.tabsGrouped || 0} tabs into ${result.groupsCreated || 0} groups`,
 				priority: 1,
@@ -327,7 +327,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 		} else {
 			chrome.notifications.create({
 				type: "basic",
-				iconUrl: "icons/icon128.png",
+				iconUrl: chrome.runtime.getURL("icons/icon128.png"),
 				title: "TidyTabs - Error",
 				message: result.error || "Failed to organize tabs",
 				priority: 2,
