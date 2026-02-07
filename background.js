@@ -1,6 +1,6 @@
 import { collectTabMetadata, getUniqueDomains, applyTabGroups, clearTabGroups, getCurrentWindowId } from "./lib/tabs.js";
 import { getSettings, saveSettings, addToHistory } from "./lib/storage.js";
-import { buildPrompt, callGemini } from "./lib/gemini.js";
+import { buildPrompt, callOpenRouter } from "./lib/openrouter.js";
 
 const AUTO_ORGANIZE_ALARM = "tidytabs-auto-organize";
 const MIN_INTERVAL_MINUTES = 2;
@@ -14,7 +14,7 @@ async function handleOrganizeTabs(options = {}) {
 	if (!settings.apiKey) {
 		return {
 			success: false,
-			error: "API key not configured. Please add your Gemini API key in settings.",
+			error: "API key not configured. Please add your OpenRouter API key in settings.",
 			needsApiKey: true,
 		};
 	}
@@ -52,7 +52,7 @@ async function handleOrganizeTabs(options = {}) {
 		};
 
 		const prompt = buildPrompt(settings.promptTemplate, variables);
-		const response = await callGemini(settings.apiKey, prompt, settings.selectedModel);
+		const response = await callOpenRouter(settings.apiKey, prompt, settings.selectedModel);
 
 		if (isPreview) {
 			const enhancedGroups = response.groups.map((group) => ({
