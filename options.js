@@ -1,5 +1,5 @@
 import { getSettings, saveSettings, saveApiKey, getPresets, savePreset, deletePreset, getHistory, clearHistory } from "./lib/storage.js";
-import { testApiKey, fetchModels, getDefaultModel } from "./lib/gemini.js";
+import { testApiKey, getDefaultModel } from "./lib/openrouter.js";
 
 const DEFAULT_PROMPT = `Group these tabs by topic/domain/category. Create 2-7 groups max. Create group which a user may seem helpful when there are a lot of tabs.
 
@@ -17,8 +17,7 @@ const elements = {
 
 	apiKeyStatus: document.getElementById("apiKeyStatus"),
 
-	modelSelect: document.getElementById("modelSelect"),
-	refreshModelsBtn: document.getElementById("refreshModelsBtn"),
+	modelInput: document.getElementById("modelInput"),
 
 	defaultScope: document.getElementById("defaultScope"),
 
@@ -51,10 +50,9 @@ async function init() {
 
 	if (settings.apiKey) {
 		elements.apiKeyInput.value = settings.apiKey;
-		await updateModelList(settings.apiKey, settings.selectedModel);
-	} else {
-		updateModelSelectState(false);
 	}
+
+	elements.modelInput.value = settings.selectedModel || getDefaultModel();
 
 	elements.defaultScope.value = settings.scope || "current";
 	elements.defaultMode.value = settings.mode || "preview";
@@ -72,66 +70,6 @@ async function init() {
 	await renderPresets();
 	await renderHistory();
 	attachEventListeners();
-}
-
-async function updateModelList(apiKey, selectedModel) {
-	if (!apiKey) {
-		updateModelSelectState(false);
-		return;
-	}
-
-	elements.modelSelect.innerHTML = "<option disabled selected>Loading models...</option>";
-	elements.modelSelect.disabled = true;
-	elements.refreshModelsBtn.disabled = true;
-
-	const models = await fetchModels(apiKey);
-	const defaultModel = getDefaultModel();
-
-	elements.modelSelect.innerHTML = "";
-	models.forEach((model) => {
-		const option = document.createElement("option");
-		option.value = model;
-		option.textContent = model;
-		elements.modelSelect.appendChild(option);
-	});
-
-	if (selectedModel && models.includes(selectedModel)) {
-		elements.modelSelect.value = selectedModel;
-	} else if (models.includes(defaultModel)) {
-		elements.modelSelect.value = defaultModel;
-	} else if (models.length > 0) {
-		elements.modelSelect.value = models[0];
-	}
-
-	if (elements.modelSelect.value && elements.modelSelect.value !== selectedModel) {
-		await saveSettings({ selectedModel: elements.modelSelect.value });
-	}
-
-	updateModelSelectState(true);
-}
-
-function updateModelSelectState(enabled) {
-	elements.modelSelect.disabled = !enabled;
-	elements.refreshModelsBtn.disabled = !enabled;
-	if (!enabled) {
-		elements.modelSelect.innerHTML = "<option disabled selected>Enter API key first</option>";
-	}
-}
-
-async function handleRefreshModels() {
-	const key = elements.apiKeyInput.value.trim();
-	if (!key) {
-		showApiKeyStatus("Please enter an API key", "error");
-		return;
-	}
-	await updateModelList(key, elements.modelSelect.value);
-}
-
-async function handleModelChange() {
-	const model = elements.modelSelect.value;
-	if (model) {
-		await saveSettings({ selectedModel: model });
-	}
 }
 
 function updateAutoOrganizeIntervalVisibility() {
@@ -168,15 +106,18 @@ async function handleSaveApiKey() {
 
 	await saveApiKey(key);
 	showApiKeyStatus("API key saved successfully", "success");
+}
 
-	// Preserve currently selected model if possible
-	const currentModel = elements.modelSelect.value;
-	await updateModelList(key, currentModel);
+async function handleModelChange() {
+	const model = elements.modelInput.value.trim();
+	if (model) {
+		await saveSettings({ selectedModel: model });
+	}
 }
 
 async function handleTestApiKey() {
 	const key = elements.apiKeyInput.value.trim();
-	const model = elements.modelSelect.value;
+	const model = elements.modelInput.value.trim();
 
 	if (!key) {
 		showApiKeyStatus("Please enter an API key first", "error");
@@ -190,7 +131,7 @@ async function handleTestApiKey() {
 	if (isValid) {
 		showApiKeyStatus("✓ API key is valid!", "success");
 	} else {
-		showApiKeyStatus("✗ API key is invalid or has no permission", "error");
+		showApiKeyStatus("✗ API key is invalid or model not available", "error");
 	}
 }
 
@@ -401,8 +342,7 @@ function attachEventListeners() {
 	elements.testApiKeyBtn.addEventListener("click", handleTestApiKey);
 	elements.toggleApiKeyBtn.addEventListener("click", toggleApiKeyVisibility);
 
-	elements.refreshModelsBtn.addEventListener("click", handleRefreshModels);
-	elements.modelSelect.addEventListener("change", handleModelChange);
+	elements.modelInput.addEventListener("change", handleModelChange);
 
 	elements.defaultScope.addEventListener("change", handleSettingsChange);
 	elements.defaultMode.addEventListener("change", handleSettingsChange);

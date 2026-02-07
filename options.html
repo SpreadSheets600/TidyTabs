@@ -24,11 +24,11 @@
 						</header>
 						<section class="card-body">
 							<p class="text-sm">
-								Enter your Gemini API key from
-								<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>. Your key is stored locally and never sent anywhere except to Gemini.
+								Enter your OpenRouter API key from
+								<a href="https://openrouter.ai/keys" target="_blank" rel="noopener">OpenRouter</a>. Your key is stored locally and never sent anywhere except to OpenRouter.
 							</p>
 							<div class="input-group">
-								<input type="password" id="apiKeyInput" class="input" placeholder="Enter your Gemini API key" autocomplete="off" />
+								<input type="password" id="apiKeyInput" class="input" placeholder="Enter your OpenRouter API key" autocomplete="off" />
 								<button id="toggleApiKeyBtn" class="btn btn-icon" title="Toggle visibility">👁</button>
 							</div>
 							<div id="apiKeyStatus" class="alert alert-info hidden" role="status"></div>
@@ -36,14 +36,9 @@
 							<div class="setting-row" style="margin-top: 1rem">
 								<div class="setting-info">
 									<p class="setting-label">Model</p>
-									<p class="setting-description">Select Gemini model</p>
+									<p class="setting-description">Any model from <a href="https://openrouter.ai/models" target="_blank" rel="noopener">OpenRouter</a></p>
 								</div>
-								<div class="flex gap-2" style="display: flex; gap: 0.5rem; width: 100%; max-width: 300px">
-									<select id="modelSelect" class="select" style="flex: 1">
-										<option value="" disabled selected>Loading models...</option>
-									</select>
-									<button id="refreshModelsBtn" class="btn btn-icon" title="Refresh Models">🔄</button>
-								</div>
+								<input type="text" id="modelInput" class="input" style="width: 100%; max-width: 300px" placeholder="e.g. google/gemini-2.0-flash-001" autocomplete="off" />
 							</div>
 						</section>
 						<footer class="card-footer">
@@ -180,7 +175,7 @@
 						</header>
 						<section class="card-body">
 							<p class="text-sm">
-								Customize the prompt sent to Gemini. Use variables like
+								Customize the prompt sent to the AI. Use variables like
 								<code>{{TAB_DATA}}</code>, <code>{{TAB_COUNT}}</code>, <code>{{DOMAINS}}</code>.
 							</p>
 							<textarea id="promptTemplate" class="textarea" rows="12" spellcheck="false"></textarea>
