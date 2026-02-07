@@ -1,6 +1,6 @@
 # TidyTabs
 
-AI-powered browser tab organization using Google's Gemini API to intelligently group your tabs by topic, domain, and context.
+AI-powered browser tab organization using OpenRouter to intelligently group your tabs by topic, domain, and context. Supports any model available on OpenRouter.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Chrome Extension](https://img.shields.io/badge/platform-chrome-brightgreen)
@@ -11,7 +11,7 @@ AI-powered browser tab organization using Google's Gemini API to intelligently g
 - Privacy-focused: all data stays local, API key stored client-side
 - Preview mode to review AI suggestions before applying
 - Fully customizable prompts with variable templates
-- AI-powered semantic grouping using Gemini API
+- AI-powered semantic grouping via OpenRouter (any model)
 - Dark mode UI with shadcn-inspired aesthetics
 - Right-click context menu for quick access
 - Auto-organize on scheduled intervals
@@ -40,7 +40,7 @@ AI-powered browser tab organization using Google's Gemini API to intelligently g
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
 ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Google%20Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![OpenRouter](https://img.shields.io/badge/OpenRouter-6366f1?style=for-the-badge&logo=openai&logoColor=white)
 ![Chrome Extensions](https://img.shields.io/badge/Chrome%20Extensions-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)
 
 ## Installation
@@ -48,7 +48,7 @@ AI-powered browser tab organization using Google's Gemini API to intelligently g
 ### Prerequisites
 
 - Any Chromium-based browser (Chrome, Edge, etc.)
-- Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+- OpenRouter API key from [OpenRouter](https://openrouter.ai/keys)
 
 ### Download and Install
 
@@ -75,14 +75,14 @@ AI-powered browser tab organization using Google's Gemini API to intelligently g
 
 2. Click the settings icon (gear) to open options.
 
-3. Enter your Gemini API key.
+3. Enter your OpenRouter API key and model name.
 
 4. Click "Save Key" and "Test Key" to verify the connection.
 
 ## Roadmap
 
 - [ ] Analytics dashboard for tab organization patterns
-- [ ] Support for additional AI models (Claude, GPT-4)
+- [x] Support for any AI model via OpenRouter
 - [ ] Export/import preset configurations
 - [ ] Tab search and filter within groups
 - [ ] Undo/redo group operations

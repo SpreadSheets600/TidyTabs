@@ -1,7 +1,7 @@
 {
   "name": "tidytabs",
   "version": "1.0.0",
-  "description": "AI-powered tab organization using Gemini API",
+  "description": "AI-powered tab organization using OpenRouter",
   "type": "module",
   "scripts": {
     "build": "extension build",
