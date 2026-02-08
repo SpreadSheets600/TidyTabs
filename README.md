@@ -4,6 +4,7 @@ AI-powered browser tab organization using OpenRouter to intelligently group your
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Chrome Extension](https://img.shields.io/badge/platform-chrome-brightgreen)
+![Firfox Extension](https://img.shields.io/badge/platform-firefox-brightgreen)
 ![Manifest V3](https://img.shields.io/badge/manifest-v3-orange)
 
 ## Key Features
@@ -86,7 +87,7 @@ AI-powered browser tab organization using OpenRouter to intelligently group your
 - [ ] Export/import preset configurations
 - [ ] Tab search and filter within groups
 - [ ] Undo/redo group operations
-- [ ] Firefox extension port
+- [x] Firefox extension port
 
 ## Contributing
 
