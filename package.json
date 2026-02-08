@@ -1,10 +1,14 @@
 {
   "name": "tidytabs",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "AI-powered tab organization using OpenRouter",
   "type": "module",
   "scripts": {
-    "build": "extension build",
+    "use:manifest:chromium": "cp manifest.chrome.json manifest.json",
+    "use:manifest:firefox": "cp manifest.firefox.json manifest.json",
+    "build": "npm run build:chromium && npm run build:firefox && npm run use:manifest:chromium",
+    "build:chromium": "npm run use:manifest:chromium && extension build --browser chromium && VERSION=$(node -p \"require('./package.json').version.replace(/\\./g, '-')\") && cd dist/chromium && zip -r ../../tidytabs-chromium-v-$VERSION.zip .",
+    "build:firefox": "npm run use:manifest:firefox && extension build --browser firefox && VERSION=$(node -p \"require('./package.json').version.replace(/\\./g, '-')\") && cd dist/firefox && zip -r ../../tidytabs-firefox-v-$VERSION.zip .",
     "dev": "extension dev",
     "preview": "extension preview",
     "test": "jest",
@@ -22,7 +26,9 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/jest.setup.js"],
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
     "transform": {
       "^.+\\.js$": "babel-jest"
     }
