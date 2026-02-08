@@ -1,9 +1,11 @@
 import { collectTabMetadata, getUniqueDomains, applyTabGroups, clearTabGroups, getCurrentWindowId } from "./lib/tabs.js";
 import { getSettings, saveSettings, addToHistory } from "./lib/storage.js";
 import { buildPrompt, callOpenRouter } from "./lib/openrouter.js";
-import { browserAPI } from "./lib/browser-compat.js";
+
+const browserAPI = globalThis.browser || globalThis.chrome;
 
 const AUTO_ORGANIZE_ALARM = "tidytabs-auto-organize";
+const CONTEXT_MENU_ID = "tidytabs-organize";
 const MIN_INTERVAL_MINUTES = 2;
 
 let cachedOrganizeResult = null;
@@ -14,6 +16,39 @@ function generateTabsSignature(tabs) {
 		.map((t) => `${t.id}:${t.url}`)
 		.sort()
 		.join("|");
+}
+
+function getActionContext() {
+	return browserAPI.action ? "action" : "browser_action";
+}
+
+function buildGroupingErrorMessage(result) {
+	if (result?.error) {
+		return result.error;
+	}
+
+	if (Array.isArray(result?.errors) && result.errors.length > 0) {
+		const firstError = result.errors[0]?.error;
+		if (firstError) {
+			return firstError;
+		}
+	}
+
+	return "Tab grouping failed in this browser. Firefox may not support tab groups on your current version.";
+}
+
+async function ensureContextMenu() {
+	const actionContext = getActionContext();
+
+	try {
+		await browserAPI.contextMenus.remove(CONTEXT_MENU_ID);
+	} catch {}
+
+	browserAPI.contextMenus.create({
+		id: CONTEXT_MENU_ID,
+		title: "Organize Tabs",
+		contexts: ["page", actionContext],
+	});
 }
 
 async function handleOrganizeTabs(options = {}) {
@@ -116,6 +151,7 @@ async function handleOrganizeTabs(options = {}) {
 			groupsCreated: result.groupsCreated,
 			tabsGrouped: result.tabsGrouped,
 			errors: result.errors,
+			error: result.success ? undefined : buildGroupingErrorMessage(result),
 		};
 	} catch (error) {
 		console.error("Organize tabs error:", error);
@@ -144,6 +180,7 @@ async function handleApplyGroups(groups) {
 			groupsCreated: result.groupsCreated,
 			tabsGrouped: result.tabsGrouped,
 			errors: result.errors,
+			error: result.success ? undefined : buildGroupingErrorMessage(result),
 		};
 	} catch (error) {
 		return {
@@ -194,12 +231,12 @@ async function handleGetStats() {
 }
 
 async function setupAutoOrganizeAlarm(enabled, intervalMinutes) {
-	await chrome.alarms.clear(AUTO_ORGANIZE_ALARM);
+	await browserAPI.alarms.clear(AUTO_ORGANIZE_ALARM);
 
 	if (enabled) {
 		const interval = Math.max(intervalMinutes, MIN_INTERVAL_MINUTES);
 
-		await chrome.alarms.create(AUTO_ORGANIZE_ALARM, {
+		await browserAPI.alarms.create(AUTO_ORGANIZE_ALARM, {
 			periodInMinutes: interval,
 			delayInMinutes: interval,
 		});
@@ -229,7 +266,7 @@ async function handleSetAutoOrganize(options) {
 
 async function handleGetAutoOrganizeStatus() {
 	const settings = await getSettings();
-	const alarm = await chrome.alarms.get(AUTO_ORGANIZE_ALARM);
+	const alarm = await browserAPI.alarms.get(AUTO_ORGANIZE_ALARM);
 
 	return {
 		enabled: settings.autoOrganize,
@@ -239,14 +276,14 @@ async function handleGetAutoOrganizeStatus() {
 	};
 }
 
-chrome.alarms.onAlarm.addListener(async (alarm) => {
+browserAPI.alarms.onAlarm.addListener(async (alarm) => {
 	if (alarm.name === AUTO_ORGANIZE_ALARM) {
 		console.log("Auto-organize triggered");
 
 		const settings = await getSettings();
 
 		if (!settings.autoOrganize) {
-			await chrome.alarms.clear(AUTO_ORGANIZE_ALARM);
+			await browserAPI.alarms.clear(AUTO_ORGANIZE_ALARM);
 			return;
 		}
 
@@ -270,27 +307,25 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 	}
 });
 
-chrome.runtime.onStartup.addListener(async () => {
-	const settings = await getSettings();
-	if (settings.autoOrganize) {
-		await setupAutoOrganizeAlarm(true, settings.autoOrganizeInterval);
-	}
-});
-
-chrome.runtime.onInstalled.addListener(async () => {
+browserAPI.runtime.onStartup.addListener(async () => {
 	const settings = await getSettings();
 	if (settings.autoOrganize) {
 		await setupAutoOrganizeAlarm(true, settings.autoOrganizeInterval);
 	}
 
-	chrome.contextMenus.create({
-		id: "tidytabs-organize",
-		title: "Organize Tabs",
-		contexts: ["page", "action"],
-	});
+	await ensureContextMenu();
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+browserAPI.runtime.onInstalled.addListener(async () => {
+	const settings = await getSettings();
+	if (settings.autoOrganize) {
+		await setupAutoOrganizeAlarm(true, settings.autoOrganizeInterval);
+	}
+
+	await ensureContextMenu();
+});
+
+browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	const { action, ...options } = message;
 
 	let handler;
@@ -326,13 +361,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	return true;
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-	if (info.menuItemId === "tidytabs-organize") {
+browserAPI.contextMenus.onClicked.addListener(async (info, tab) => {
+	if (info.menuItemId === CONTEXT_MENU_ID) {
 		const settings = await getSettings();
 
-		const notificationId = await chrome.notifications.create({
+		const notificationId = await browserAPI.notifications.create({
 			type: "basic",
-			iconUrl: chrome.runtime.getURL("icons/icon128.png"),
+			iconUrl: browserAPI.runtime.getURL("icons/icon128.png"),
 			title: "TidyTabs",
 			message: "Analyzing tabs...",
 			priority: 1,
@@ -343,26 +378,30 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 			mode: "instant",
 		});
 
-		chrome.notifications.clear(notificationId);
+		browserAPI.notifications.clear(notificationId);
 
 		if (result.success) {
-			chrome.notifications.create({
+			browserAPI.notifications.create({
 				type: "basic",
-				iconUrl: chrome.runtime.getURL("icons/icon128.png"),
+				iconUrl: browserAPI.runtime.getURL("icons/icon128.png"),
 				title: "TidyTabs - Success",
 				message: `Organized ${result.tabsGrouped || 0} tabs into ${result.groupsCreated || 0} groups`,
 				priority: 1,
 			});
 		} else {
-			chrome.notifications.create({
+			browserAPI.notifications.create({
 				type: "basic",
-				iconUrl: chrome.runtime.getURL("icons/icon128.png"),
+				iconUrl: browserAPI.runtime.getURL("icons/icon128.png"),
 				title: "TidyTabs - Error",
 				message: result.error || "Failed to organize tabs",
 				priority: 2,
 			});
 		}
 	}
+});
+
+ensureContextMenu().catch((error) => {
+	console.error("Failed to initialize context menu:", error);
 });
 
 console.log("TidyTabs background service worker loaded");
