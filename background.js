@@ -1,15 +1,27 @@
 import { collectTabMetadata, getUniqueDomains, applyTabGroups, clearTabGroups, getCurrentWindowId } from "./lib/tabs.js";
 import { getSettings, saveSettings, addToHistory } from "./lib/storage.js";
 import { buildPrompt, callOpenRouter } from "./lib/openrouter.js";
+import { browserAPI } from "./lib/browser-compat.js";
 
 const AUTO_ORGANIZE_ALARM = "tidytabs-auto-organize";
 const MIN_INTERVAL_MINUTES = 2;
+
+let cachedOrganizeResult = null;
+let cachedTabsSignature = null;
+
+function generateTabsSignature(tabs) {
+	return tabs
+		.map((t) => `${t.id}:${t.url}`)
+		.sort()
+		.join("|");
+}
 
 async function handleOrganizeTabs(options = {}) {
 	const settings = await getSettings();
 	const scope = options.scope || settings.scope;
 	const mode = options.isAuto ? "instant" : options.mode || settings.mode;
 	const isPreview = mode === "preview";
+	const forceRefresh = options.forceRefresh || false;
 
 	if (!settings.apiKey) {
 		return {
@@ -39,20 +51,34 @@ async function handleOrganizeTabs(options = {}) {
 			};
 		}
 
-		const variables = {
-			TAB_DATA: tabs.map((t) => ({
-				id: t.id,
-				title: t.title,
-				url: t.url,
-				domain: t.domain,
-			})),
-			TAB_COUNT: tabs.length,
-			DOMAINS: getUniqueDomains(tabs),
-			WINDOW_ID: await getCurrentWindowId(),
-		};
+		const currentSignature = generateTabsSignature(tabs);
 
-		const prompt = buildPrompt(settings.promptTemplate, variables);
-		const response = await callOpenRouter(settings.apiKey, prompt, settings.selectedModel);
+		let response;
+		if (isPreview && !forceRefresh && cachedTabsSignature === currentSignature && cachedOrganizeResult) {
+			console.log("Using cached organize result for deterministic preview");
+			response = cachedOrganizeResult;
+		} else {
+			const variables = {
+				TAB_DATA: tabs.map((t) => ({
+					id: t.id,
+					title: t.title,
+					url: t.url,
+					domain: t.domain,
+				})),
+				TAB_COUNT: tabs.length,
+				DOMAINS: getUniqueDomains(tabs),
+				WINDOW_ID: await getCurrentWindowId(),
+			};
+
+			const prompt = buildPrompt(settings.promptTemplate, variables);
+			response = await callOpenRouter(settings.apiKey, prompt, settings.selectedModel);
+
+			if (isPreview) {
+				cachedOrganizeResult = response;
+				cachedTabsSignature = currentSignature;
+				console.log("Cached new organize result for deterministic preview");
+			}
+		}
 
 		if (isPreview) {
 			const enhancedGroups = response.groups.map((group) => ({
@@ -109,6 +135,9 @@ async function handleApplyGroups(groups) {
 			groups: groups,
 			tabCount: groups.reduce((sum, g) => sum + g.tabIds.length, 0),
 		});
+
+		cachedOrganizeResult = null;
+		cachedTabsSignature = null;
 
 		return {
 			success: result.success,
