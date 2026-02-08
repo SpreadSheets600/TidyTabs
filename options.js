@@ -1,12 +1,7 @@
-import { getSettings, saveSettings, saveApiKey, getPresets, savePreset, deletePreset, getHistory, clearHistory } from "./lib/storage.js";
+import { getSettings, saveSettings, saveApiKey, getPresets, savePreset, deletePreset, getHistory, clearHistory, DEFAULT_PROMPT_TEMPLATE } from "./lib/storage.js";
 import { testApiKey, getDefaultModel } from "./lib/openrouter.js";
 
-const DEFAULT_PROMPT = `Group these tabs by topic/domain/category. Create 2-7 groups max. Create group which a user may seem helpful when there are a lot of tabs.
-
-{{TAB_DATA}}
-
-Output valid JSON only:
-{"groups":[{"label":"Short Name","tabIds":[1,2,3]}]}`;
+const browserAPI = globalThis.browser || globalThis.chrome;
 
 const elements = {
 	apiKeyInput: document.getElementById("apiKeyInput"),
@@ -65,7 +60,7 @@ async function init() {
 	elements.autoOrganizeInterval.value = settings.autoOrganizeInterval || 5;
 
 	updateAutoOrganizeIntervalVisibility();
-	elements.promptTemplate.value = settings.promptTemplate || DEFAULT_PROMPT;
+	elements.promptTemplate.value = settings.promptTemplate || DEFAULT_PROMPT_TEMPLATE;
 
 	await renderPresets();
 	await renderHistory();
@@ -174,7 +169,7 @@ async function handleAutoOrganizeChange() {
 		return;
 	}
 
-	await chrome.runtime.sendMessage({
+	await browserAPI.runtime.sendMessage({
 		action: "setAutoOrganize",
 		enabled: enabled,
 		interval: interval,
@@ -186,7 +181,7 @@ async function handleAutoOrganizeIntervalChange() {
 	const interval = parseInt(elements.autoOrganizeInterval.value, 10);
 
 	if (enabled) {
-		await chrome.runtime.sendMessage({
+		await browserAPI.runtime.sendMessage({
 			action: "setAutoOrganize",
 			enabled: true,
 			interval: interval,
@@ -217,8 +212,8 @@ async function handleResetPrompt() {
 		return;
 	}
 
-	elements.promptTemplate.value = DEFAULT_PROMPT;
-	await saveSettings({ promptTemplate: DEFAULT_PROMPT });
+	elements.promptTemplate.value = DEFAULT_PROMPT_TEMPLATE;
+	await saveSettings({ promptTemplate: DEFAULT_PROMPT_TEMPLATE });
 }
 
 async function handleSavePreset() {
