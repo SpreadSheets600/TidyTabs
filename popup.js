@@ -1,6 +1,8 @@
 import { getSettings, saveSettings } from "./lib/storage.js";
 import { getColorForGroup } from "./lib/colors.js";
 
+const browserAPI = globalThis.browser || globalThis.chrome;
+
 const elements = {
 	// Stats
 	tabCount: document.getElementById("tabCount"),
@@ -88,7 +90,7 @@ function updateAutoOrganizeUI() {
 
 async function updateStats() {
 	try {
-		const response = await chrome.runtime.sendMessage({ action: "getStats" });
+		const response = await browserAPI.runtime.sendMessage({ action: "getStats" });
 		const count = currentSettings.scope === "current" ? response.currentWindow : response.allWindows;
 		elements.tabCount.innerHTML = `<span class="font-semibold text-base-content">${count}</span> tabs`;
 	} catch (error) {
@@ -109,7 +111,7 @@ function showLoading(show = true, text = "Analyzing tabs...") {
 }
 
 function showError(message) {
-	elements.errorText.textContent = message;
+	elements.errorText.textContent = message || "Operation failed. Check extension background logs for details.";
 	elements.errorMessage.classList.remove("hidden");
 	elements.successMessage.classList.add("hidden");
 
@@ -166,7 +168,7 @@ async function handleOrganize() {
 	hidePreview();
 
 	try {
-		const response = await chrome.runtime.sendMessage({
+		const response = await browserAPI.runtime.sendMessage({
 			action: "organizeTabs",
 			scope: currentSettings.scope,
 			mode: currentSettings.mode,
@@ -176,9 +178,9 @@ async function handleOrganize() {
 
 		if (!response.success) {
 			if (response.needsApiKey) {
-				chrome.runtime.openOptionsPage();
+				browserAPI.runtime.openOptionsPage();
 			}
-			showError(response.error);
+			showError(response.error || "Unable to organize tabs in this browser.");
 			return;
 		}
 
@@ -200,7 +202,7 @@ async function handleApply() {
 	showLoading(true, "Applying groups...");
 
 	try {
-		const response = await chrome.runtime.sendMessage({
+		const response = await browserAPI.runtime.sendMessage({
 			action: "applyGroups",
 			groups: previewGroups,
 		});
@@ -209,7 +211,7 @@ async function handleApply() {
 		hidePreview();
 
 		if (!response.success) {
-			showError(response.error);
+			showError(response.error || "Unable to apply tab groups in this browser.");
 			return;
 		}
 
@@ -223,7 +225,7 @@ async function handleApply() {
 
 async function handleClear() {
 	try {
-		const response = await chrome.runtime.sendMessage({
+		const response = await browserAPI.runtime.sendMessage({
 			action: "clearGroups",
 			scope: currentSettings.scope,
 		});
@@ -232,7 +234,7 @@ async function handleClear() {
 			showSuccess(`Cleared ${response.groupsRemoved} groups`);
 			await updateStats();
 		} else {
-			showError(response.error);
+			showError(response.error || "Unable to clear tab groups in this browser.");
 		}
 	} catch (error) {
 		showError(error.message || "Failed to clear groups");
@@ -268,7 +270,7 @@ async function handleAutoOrganizeToggle() {
 	}
 
 	try {
-		const response = await chrome.runtime.sendMessage({
+		const response = await browserAPI.runtime.sendMessage({
 			action: "setAutoOrganize",
 			enabled: enabled,
 			interval: currentSettings.autoOrganizeInterval || 5,
@@ -311,7 +313,7 @@ function handleKeydown(event) {
 	}
 
 	if (event.key === "s" || event.key === "S") {
-		chrome.runtime.openOptionsPage();
+		browserAPI.runtime.openOptionsPage();
 		return;
 	}
 
@@ -342,15 +344,15 @@ function attachEventListeners() {
 	// Action buttons
 	elements.organizeBtn.addEventListener("click", handleOrganize);
 	elements.clearBtn.addEventListener("click", handleClear);
-	elements.settingsBtn.addEventListener("click", () => chrome.runtime.openOptionsPage());
+	elements.settingsBtn.addEventListener("click", () => browserAPI.runtime.openOptionsPage());
 
 	// Preview actions
 	elements.closePreviewBtn.addEventListener("click", hidePreview);
 	elements.applyBtn.addEventListener("click", handleApply);
-	elements.editBtn.addEventListener("click", () => chrome.runtime.openOptionsPage());
+	elements.editBtn.addEventListener("click", () => browserAPI.runtime.openOptionsPage());
 
 	// API key warning
-	elements.addApiKeyBtn.addEventListener("click", () => chrome.runtime.openOptionsPage());
+	elements.addApiKeyBtn.addEventListener("click", () => browserAPI.runtime.openOptionsPage());
 
 	// Error dismiss
 	elements.dismissErrorBtn.addEventListener("click", () => {
