@@ -3,7 +3,7 @@
 AI-powered browser tab organization using OpenRouter to intelligently group your tabs by topic, domain, and context. Supports any model available on OpenRouter.
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![Chrome Extension](https://img.shields.io/badge/platform-chrome-brightgreen)
+![Chrome Extension](https://chromewebstore.google.com/detail/tidytabs/cpmlaapifmhgklniidiijogjgnnhcbmn?authuser=3&pageId=none)
 ![Firfox Extension](https://img.shields.io/badge/platform-firefox-brightgreen)
 ![Manifest V3](https://img.shields.io/badge/manifest-v3-orange)
 
